@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser"
 import userRouter from "./routes/user.routes.js"
 import itemRoutes from "./routes/item.routes.js"
+import swapRoutes from "./routes/swap.routes.js";
 
 const app=express();
 
@@ -28,5 +29,6 @@ app.get("/",(req,res)=>{
 //routes declaration
 app.use("/api/item", itemRoutes)
 app.use("/api/v1/users",userRouter)
+app.use("/api/swap", swapRoutes);
 
 export default app;

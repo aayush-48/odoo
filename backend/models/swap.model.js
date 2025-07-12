@@ -7,35 +7,31 @@ const swapSchema = new Schema({
     ref: 'Item',
     required: [true, "Item reference is required"]
   },
+  offeredItemId: {
+    type: Types.ObjectId,
+    ref: 'Item',
+    required: function () {
+      return this.swapType === 'direct';
+    }
+  },
   requesterId: {
     type: Types.ObjectId,
     ref: 'User',
-    required: [true, "Requester (user initiating the swap) is required"]
+    required: [true, "Requester is required"]
   },
   ownerId: {
     type: Types.ObjectId,
     ref: 'User',
-    required: [true, "Owner of the item is required"]
-  },
-  adminId: {
-    type: Types.ObjectId,
-    ref: 'User',
-    default: null 
+    required: [true, "Owner is required"]
   },
   swapType: {
     type: String,
-    enum: {
-      values: ['direct', 'points'],
-      message: "Swap type must be either 'direct' or 'points'"
-    },
+    enum: ['direct', 'points'],
     required: [true, "Swap type is required"]
   },
   status: {
     type: String,
-    enum: {
-      values: ['pending', 'approved', 'rejected', 'completed'],
-      message: "Status must be one of: pending, approved, rejected, completed"
-    },
+    enum: ['pending', 'approved', 'rejected', 'completed'],
     default: 'pending'
   }
 }, { timestamps: true });
