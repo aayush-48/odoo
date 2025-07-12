@@ -61,20 +61,24 @@ const AddItemPage = ({ onNavigate, onLogout }: AddItemPageProps) => {
 
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Item submitted:", { ...formData, tags, images });
-    // onNavigate("dashboard");
+    // Get JWT from localStorage
+    const token = localStorage.getItem("jwt");
+    if (!token) {
+      alert("You must be logged in to add an item.");
+      return;
+    }
     try{
       const res = await axios.post("http://localhost:8000/api/item/create", {
-        ...formData, front_image : images[0], back_image: images[1], userId : "asd"
-      })
-
-      console.log(res);
-      
+        ...formData, front_image : images[0], back_image: images[1], tags
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("Item listed successfully!");
+      onNavigate("dashboard");
     }catch(e){
+      alert("Failed to list item. Please try again.");
       console.log(e);
-      
     }
-
   };
 
   return (

@@ -5,6 +5,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { UserPlus, User, Mail, Lock, ArrowLeft } from "lucide-react";
+import axios from "axios";
 
 interface RegisterPageProps {
   onNavigate: (page: string) => void;
@@ -12,21 +13,33 @@ interface RegisterPageProps {
 
 const RegisterPage = ({ onNavigate }: RegisterPageProps) => {
   const [formData, setFormData] = useState({
-    fullName: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: ""
   });
+  const [profileImage, setProfileImage] = useState<File | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords don't match!");
       return;
     }
-    // Registration logic here
-    console.log("Registration submitted:", formData);
-    onNavigate("login");
+    try {
+      const form = new FormData();
+      form.append("username", formData.username);
+      form.append("email", formData.email);
+      form.append("password", formData.password);
+      if (profileImage) form.append("profileImage", profileImage);
+      await axios.post("http://localhost:8000/api/v1/users/register", form, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      alert("Registration successful! Please login.");
+      onNavigate("login");
+    } catch (err) {
+      alert("Registration failed. Please try again.");
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -54,15 +67,25 @@ const RegisterPage = ({ onNavigate }: RegisterPageProps) => {
           <CardContent className="space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">user name</Label>
+                <Label htmlFor="profileImage" className="text-sm font-medium text-gray-700">Profile Image</Label>
+                <Input
+                  id="profileImage"
+                  type="file"
+                  accept="image/*"
+                  onChange={e => setProfileImage(e.target.files?.[0] || null)}
+                  className="h-11 rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-sm font-medium text-gray-700">Username</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
-                    id="fullName"
+                    id="username"
                     type="text"
-                    placeholder="Enter your user name"
-                    value={formData.fullName}
-                    onChange={(e) => handleInputChange("fullName", e.target.value)}
+                    placeholder="Enter your username"
+                    value={formData.username}
+                    onChange={(e) => handleInputChange("username", e.target.value)}
                     className="pl-10 h-11 rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                     required
                   />

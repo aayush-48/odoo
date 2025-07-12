@@ -30,6 +30,7 @@ const LandingPage = ({ onNavigate, onLogout, isAdmin = false, isAuthenticated = 
 
   // Handle navigation - redirect to login if not authenticated for protected routes
   const handleNavigation = (page: string, item?: any) => {
+    console.log('handleNavigation called:', page, item, 'isAuthenticated:', isAuthenticated);
     if (!isAuthenticated && ['browse', 'dashboard', 'add-item', 'admin'].includes(page)) {
       onNavigate("login");
     } else {
@@ -112,6 +113,12 @@ const LandingPage = ({ onNavigate, onLogout, isAdmin = false, isAuthenticated = 
                 className="text-gray-700 hover:text-purple-600 font-medium"
               >
                 Home
+              </button>
+              <button
+                onClick={() => handleNavigation("swap")}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                Start Swap
               </button>
               
               {!isAuthenticated ? (

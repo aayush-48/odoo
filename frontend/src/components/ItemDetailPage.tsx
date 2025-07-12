@@ -4,6 +4,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { ArrowLeft, Heart, Share2, User, MapPin, Calendar, LogOut, Repeat2, Coins } from "lucide-react";
+import axios from "axios";
 
 interface ItemDetailPageProps {
   item: any;
@@ -73,10 +74,24 @@ const ItemDetailPage = ({ item, onNavigate, onLogout }: ItemDetailPageProps) => 
   // Ensure tags array exists
   const tags = mockItem.tags || [];
 
-  const handleSwapRequest = (swapType: 'item' | 'points') => {
-    console.log(`${swapType} swap request initiated for item:`, mockItem.id);
-    setShowSwapOptions(false);
-    // Here you would typically navigate to a swap confirmation page or show a modal
+  const handleSwapRequest = async (swapType: 'item' | 'points') => {
+    const token = localStorage.getItem("jwt");
+    if (!token) {
+      alert("You must be logged in to request a swap.");
+      return;
+    }
+    try {
+      await axios.post("http://localhost:8000/api/swap/request", {
+        itemId: mockItem.id,
+        type: swapType
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("Swap request sent!");
+      setShowSwapOptions(false);
+    } catch (err) {
+      alert("Failed to send swap request.");
+    }
   };
 
   return (

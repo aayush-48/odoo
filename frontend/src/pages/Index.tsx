@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LoginPage from "../components/LoginPage";
 import RegisterPage from "../components/RegisterPage";
 import LandingPage from "../components/LandingPage";
@@ -16,7 +16,19 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
+  useEffect(() => {
+    const token = localStorage.getItem("jwt");
+    if (token) {
+      setIsAuthenticated(true);
+      // Optionally decode JWT to check admin, or store admin flag in localStorage
+      // For now, assume admin if a flag is set
+      const adminFlag = localStorage.getItem("isAdmin");
+      setIsAdmin(adminFlag === "true");
+    }
+  }, []);
+
   const navigateTo = (page: string, item?: any) => {
+    console.log('navigateTo called:', page, item);
     setCurrentPage(page);
     if (item) setSelectedItem(item);
   };
@@ -24,12 +36,15 @@ const Index = () => {
   const handleLogin = (isAdminUser = false) => {
     setIsAuthenticated(true);
     setIsAdmin(isAdminUser);
+    localStorage.setItem("isAdmin", isAdminUser ? "true" : "false");
     setCurrentPage(isAdminUser ? "admin" : "landing");
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setIsAdmin(false);
+    localStorage.removeItem("jwt");
+    localStorage.removeItem("isAdmin");
     setCurrentPage("login");
   };
 
@@ -46,7 +61,7 @@ const Index = () => {
 
   switch (currentPage) {
     case "landing":
-      return <LandingPage onNavigate={navigateTo} onLogout={handleLogout} isAdmin={isAdmin} isAuthenticated={true} />;
+      return <LandingPage onNavigate={navigateTo} onLogout={handleLogout} isAdmin={isAdmin} isAuthenticated={isAuthenticated} />;
     case "dashboard":
       return <Dashboard onNavigate={navigateTo} onLogout={handleLogout} />;
     case "add-item":
@@ -60,7 +75,7 @@ const Index = () => {
     case "admin":
       return isAdmin ? <AdminPanel onNavigate={navigateTo} onLogout={handleLogout} /> : <LandingPage onNavigate={navigateTo} onLogout={handleLogout} isAdmin={isAdmin} />;
     default:
-      return <LandingPage onNavigate={navigateTo} onLogout={handleLogout} isAdmin={isAdmin} isAuthenticated={true} />;
+      return <LandingPage onNavigate={navigateTo} onLogout={handleLogout} isAdmin={isAdmin} isAuthenticated={isAuthenticated} />;
   }
 };
 

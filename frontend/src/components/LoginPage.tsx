@@ -5,6 +5,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { UserCircle, Mail, Lock } from "lucide-react";
+import axios from "axios";
 
 interface LoginPageProps {
   onNavigate: (page: string) => void;
@@ -15,12 +16,20 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (email && password) {
-      // Check if admin email
-      const isAdmin = email.toLowerCase().includes('admin') || email === 'admin@rewear.com';
-      onLogin(isAdmin);
+      try {
+        const res = await axios.post("http://localhost:8000/api/v1/users/login", {
+          email,
+          password
+        });
+        const { token, isAdmin } = res.data;
+        localStorage.setItem("jwt", token);
+        onLogin(isAdmin);
+      } catch (err) {
+        alert("Login failed. Please check your credentials.");
+      }
     }
   };
 

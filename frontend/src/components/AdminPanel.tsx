@@ -25,6 +25,7 @@ import {
   ArrowLeftRight,
   List
 } from "lucide-react";
+import axios from "axios";
 
 interface AdminPanelProps {
   onNavigate: (page: string) => void;
@@ -233,12 +234,26 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
     ));
   };
 
-  const handleSwapAction = (swapId: number, action: "approve" | "reject") => {
-    setSwapRequests(prev => prev.map(swap => 
-      swap.id === swapId 
-        ? { ...swap, status: action === "approve" ? "approved" : "rejected" }
-        : swap
-    ));
+  const handleSwapAction = async (swapId: number, action: "approve" | "reject") => {
+    const token = localStorage.getItem("jwt");
+    if (!token) {
+      alert("You must be logged in as admin.");
+      return;
+    }
+    try {
+      const url = `http://localhost:8000/api/swap/${action}/${swapId}`;
+      await axios.patch(url, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSwapRequests(prev => prev.map(swap =>
+        swap.id === swapId
+          ? { ...swap, status: action === "approve" ? "approved" : "rejected" }
+          : swap
+      ));
+      alert(`Swap ${action}d successfully!`);
+    } catch (err) {
+      alert(`Failed to ${action} swap.`);
+    }
   };
 
   const stats = [
