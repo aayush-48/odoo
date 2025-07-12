@@ -22,7 +22,8 @@ import {
   Mail,
   Calendar,
   ShoppingBag,
-  ArrowLeftRight
+  ArrowLeftRight,
+  List
 } from "lucide-react";
 
 interface AdminPanelProps {
@@ -33,12 +34,13 @@ interface AdminPanelProps {
 const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
   const [selectedTab, setSelectedTab] = useState("pending");
   const [searchQuery, setSearchQuery] = useState("");
-  type PendingItem = {
+  
+  type Item = {
     id: number;
     title: string;
     user: string;
     submitted: string;
-    status: string;
+    status: "pending" | "approved" | "rejected";
     flagged: boolean;
     description: string;
     category: string;
@@ -47,7 +49,7 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
     location: string;
   };
   
-  const [selectedItem, setSelectedItem] = useState<PendingItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
   type User = {
     id: number;
@@ -56,7 +58,7 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
     items: number;
     swaps: number;
     joined: string;
-    status: string;
+    status: "active" | "suspended";
     phone: string;
     address: string;
     rating: number;
@@ -69,13 +71,13 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
   const [showItemModal, setShowItemModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
 
-  const [pendingItems, setPendingItems] = useState([
+  const [allItems, setAllItems] = useState<Item[]>([
     { 
       id: 1, 
       title: "Vintage Leather Jacket", 
       user: "John Doe", 
       submitted: "2024-01-20", 
-      status: "pending", 
+      status: "approved", 
       flagged: false,
       description: "Beautiful vintage leather jacket in excellent condition. Size M. Genuine leather with minimal wear.",
       category: "Outerwear",
@@ -101,7 +103,7 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
       title: "Summer Dress", 
       user: "Emma Wilson", 
       submitted: "2024-01-18", 
-      status: "pending", 
+      status: "approved", 
       flagged: false,
       description: "Flowy summer dress perfect for warm weather. Size S. Worn only once.",
       category: "Clothing",
@@ -109,9 +111,37 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
       images: ["dress1.jpg", "dress2.jpg", "dress3.jpg"],
       location: "Chicago, IL"
     },
+    { 
+      id: 4, 
+      title: "Wireless Headphones", 
+      user: "Mike Johnson", 
+      submitted: "2024-01-17", 
+      status: "approved", 
+      flagged: false,
+      description: "Premium wireless headphones with noise cancellation. Like new condition.",
+      category: "Electronics",
+      condition: "Excellent",
+      images: ["headphones1.jpg", "headphones2.jpg"],
+      location: "Seattle, WA"
+    },
+    { 
+      id: 5, 
+      title: "Coffee Table", 
+      user: "Alex Brown", 
+      submitted: "2024-01-16", 
+      status: "rejected", 
+      flagged: false,
+      description: "Modern wooden coffee table with glass top. Some minor scratches.",
+      category: "Furniture",
+      condition: "Fair",
+      images: ["table1.jpg", "table2.jpg"],
+      location: "Boston, MA"
+    },
   ]);
 
-  const [users, setUsers] = useState([
+  const pendingItems = allItems.filter(item => item.status === "pending");
+
+  const [users, setUsers] = useState<User[]>([
     { 
       id: 1, 
       name: "John Doe", 
@@ -166,32 +196,33 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
     { id: 4, requester: "Mike Johnson", requestedItem: "T-Shirt", offeredItem: "Jeans", status: "pending", date: "2024-01-17" },
   ]);
 
-  const handleViewItem = (item: any) => {
+  const handleViewItem = (item: Item) => {
     setSelectedItem(item);
     setShowItemModal(true);
   };
 
-  const handleViewUser = (user: any) => {
+  const handleViewUser = (user: User) => {
     setSelectedUser(user);
     setShowUserModal(true);
   };
 
   const handleApprove = (itemId: number) => {
-    setPendingItems(prev => prev.filter(item => item.id !== itemId));
+    setAllItems(prev => prev.map(item => 
+      item.id === itemId ? { ...item, status: "approved" } : item
+    ));
     setShowItemModal(false);
-    console.log("Approved item:", itemId);
   };
 
   const handleReject = (itemId: number) => {
-    setPendingItems(prev => prev.filter(item => item.id !== itemId));
+    setAllItems(prev => prev.map(item => 
+      item.id === itemId ? { ...item, status: "rejected" } : item
+    ));
     setShowItemModal(false);
-    console.log("Rejected item:", itemId);
   };
 
   const handleDeleteItem = (itemId: number) => {
-    setPendingItems(prev => prev.filter(item => item.id !== itemId));
+    setAllItems(prev => prev.filter(item => item.id !== itemId));
     setShowItemModal(false);
-    console.log("Deleted item:", itemId);
   };
 
   const handleUserStatusToggle = (userId: number) => {
@@ -208,14 +239,13 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
         ? { ...swap, status: action === "approve" ? "approved" : "rejected" }
         : swap
     ));
-    console.log(`${action} swap:`, swapId);
   };
 
   const stats = [
     { label: "Total Users", value: users.length.toString(), icon: Users, color: "text-blue-600" },
-    { label: "Pending Items", value: pendingItems.length.toString(), icon: Package, color: "text-orange-600" },
-    { label: "Flagged Content", value: "5", icon: AlertCircle, color: "text-red-600" },
-    { label: "Pending Swaps", value: swapRequests.filter(s => s.status === "pending").length.toString(), icon: Repeat2, color: "text-purple-600" },
+    { label: "Total Items", value: allItems.length.toString(), icon: Package, color: "text-purple-600" },
+    { label: "Active Swaps", value: swapRequests.filter(s => s.status === "approved").length.toString(), icon: Repeat2, color: "text-green-600" },
+    { label: "Pending Items", value: pendingItems.length.toString(), icon: AlertCircle, color: "text-orange-600" },
   ];
 
   return (
@@ -249,7 +279,7 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
-            <Card key={index}>
+            <Card key={index} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -276,9 +306,21 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
                 }`}
               >
                 Pending Items
-                <Badge className="ml-2 bg-orange-100 text-orange-800">
-                  {pendingItems.length}
-                </Badge>
+                {pendingItems.length > 0 && (
+                  <Badge className="ml-2 bg-orange-100 text-orange-800">
+                    {pendingItems.length}
+                  </Badge>
+                )}
+              </button>
+              <button
+                onClick={() => setSelectedTab("items")}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  selectedTab === "items"
+                    ? "border-purple-500 text-purple-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                All Items
               </button>
               <button
                 onClick={() => setSelectedTab("users")}
@@ -299,19 +341,11 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
                 }`}
               >
                 Swap Management
-                <Badge className="ml-2 bg-purple-100 text-purple-800">
-                  {swapRequests.filter(s => s.status === "pending").length}
-                </Badge>
-              </button>
-              <button
-                onClick={() => setSelectedTab("reports")}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  selectedTab === "reports"
-                    ? "border-purple-500 text-purple-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Reports
+                {swapRequests.filter(s => s.status === "pending").length > 0 && (
+                  <Badge className="ml-2 bg-purple-100 text-purple-800">
+                    {swapRequests.filter(s => s.status === "pending").length}
+                  </Badge>
+                )}
               </button>
             </nav>
           </div>
@@ -332,7 +366,7 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
 
         {/* Content based on selected tab */}
         {selectedTab === "pending" && (
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Package className="w-5 h-5 text-orange-600" />
@@ -342,7 +376,7 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
             <CardContent>
               <div className="space-y-4">
                 {pendingItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-medium text-gray-900">{item.title}</h4>
@@ -381,14 +415,6 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
                       >
                         <X className="w-4 h-4" />
                       </Button>
-                      <Button
-                        onClick={() => handleDeleteItem(item.id)}
-                        size="sm"
-                        variant="outline"
-                        className="border-red-200 text-red-600 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
                     </div>
                   </div>
                 ))}
@@ -403,8 +429,66 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
           </Card>
         )}
 
+        {selectedTab === "items" && (
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <List className="w-5 h-5 text-purple-600" />
+                All Listed Items
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {allItems.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium text-gray-900">{item.title}</h4>
+                        <Badge className={
+                          item.status === "pending" ? "bg-yellow-100 text-yellow-800" :
+                          item.status === "approved" ? "bg-green-100 text-green-800" :
+                          "bg-red-100 text-red-800"
+                        }>
+                          {item.status}
+                        </Badge>
+                        {item.flagged && (
+                          <Badge className="bg-red-100 text-red-800">
+                            <AlertCircle className="w-3 h-3 mr-1" />
+                            Flagged
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600">by {item.user}</p>
+                      <p className="text-xs text-gray-500">Submitted: {item.submitted}</p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-purple-200 text-purple-600 hover:bg-purple-50"
+                        onClick={() => handleViewItem(item)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteItem(item.id)}
+                        size="sm"
+                        variant="outline"
+                        className="border-red-200 text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {selectedTab === "users" && (
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-blue-600" />
@@ -414,7 +498,7 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
             <CardContent>
               <div className="space-y-4">
                 {users.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-medium text-gray-900">{user.name}</h4>
@@ -453,7 +537,7 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
         )}
 
         {selectedTab === "swaps" && (
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Repeat2 className="w-5 h-5 text-purple-600" />
@@ -463,7 +547,7 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
             <CardContent>
               <div className="space-y-4">
                 {swapRequests.map((swap) => (
-                  <div key={swap.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div key={swap.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-medium text-gray-900">Swap Request</h4>
@@ -509,29 +593,12 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
             </CardContent>
           </Card>
         )}
-
-        {selectedTab === "reports" && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-red-600" />
-                Reports & Flagged Content
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                <p>No reports at this time</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
 
       {/* Item Details Modal */}
       {showItemModal && selectedItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900">Item Details</h2>
@@ -547,6 +614,13 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg font-semibold text-gray-900">{selectedItem.title}</h3>
+                  <Badge className={
+                    selectedItem.status === "pending" ? "bg-yellow-100 text-yellow-800" :
+                    selectedItem.status === "approved" ? "bg-green-100 text-green-800" :
+                    "bg-red-100 text-red-800"
+                  }>
+                    {selectedItem.status}
+                  </Badge>
                   {selectedItem.flagged && (
                     <Badge className="bg-red-100 text-red-800">
                       <AlertCircle className="w-3 h-3 mr-1" />
@@ -596,21 +670,25 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
                 </div>
                 
                 <div className="flex gap-2 pt-4">
-                  <Button
-                    onClick={() => handleApprove(selectedItem.id)}
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    <Check className="w-4 h-4 mr-2" />
-                    Approve
-                  </Button>
-                  <Button
-                    onClick={() => handleReject(selectedItem.id)}
-                    variant="outline"
-                    className="border-red-200 text-red-600 hover:bg-red-50"
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    Reject
-                  </Button>
+                  {selectedItem.status === "pending" && (
+                    <>
+                      <Button
+                        onClick={() => handleApprove(selectedItem.id)}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <Check className="w-4 h-4 mr-2" />
+                        Approve
+                      </Button>
+                      <Button
+                        onClick={() => handleReject(selectedItem.id)}
+                        variant="outline"
+                        className="border-red-200 text-red-600 hover:bg-red-50"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Reject
+                      </Button>
+                    </>
+                  )}
                   <Button
                     onClick={() => handleDeleteItem(selectedItem.id)}
                     variant="outline"
@@ -629,7 +707,7 @@ const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
       {/* User Profile Modal */}
       {showUserModal && selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900">User Profile</h2>
