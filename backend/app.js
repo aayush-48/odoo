@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser"
+import userRouter from "./routes/user.routes.js"
 import itemRoutes from "./routes/item.routes.js"
 
 const app=express();
@@ -23,5 +24,8 @@ app.use("/api/item", itemRoutes)
 app.get("/",(req,res)=>{
     res.send("Hello");
 })
+
+//routes declaration
+app.use("/api/v1/users",userRouter)
 
 export default app;
