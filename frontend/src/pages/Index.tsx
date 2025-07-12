@@ -11,7 +11,7 @@ import BrowsePage from "../components/BrowsePage";
 import AdminPanel from "../components/AdminPanel";
 
 const Index = () => {
-  const [currentPage, setCurrentPage] = useState("login");
+  const [currentPage, setCurrentPage] = useState("landing");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -37,12 +37,16 @@ const Index = () => {
     if (currentPage === "register") {
       return <RegisterPage onNavigate={navigateTo} />;
     }
-    return <LoginPage onNavigate={navigateTo} onLogin={handleLogin} />;
+    if (currentPage === "login") {
+      return <LoginPage onNavigate={navigateTo} onLogin={handleLogin} />;
+    }
+    // Show landing page with login/register buttons if not authenticated
+    return <LandingPage onNavigate={navigateTo} isAuthenticated={false} />;
   }
 
   switch (currentPage) {
     case "landing":
-      return <LandingPage onNavigate={navigateTo} onLogout={handleLogout} isAdmin={isAdmin} />;
+      return <LandingPage onNavigate={navigateTo} onLogout={handleLogout} isAdmin={isAdmin} isAuthenticated={true} />;
     case "dashboard":
       return <Dashboard onNavigate={navigateTo} onLogout={handleLogout} />;
     case "add-item":
@@ -56,7 +60,7 @@ const Index = () => {
     case "admin":
       return isAdmin ? <AdminPanel onNavigate={navigateTo} onLogout={handleLogout} /> : <LandingPage onNavigate={navigateTo} onLogout={handleLogout} isAdmin={isAdmin} />;
     default:
-      return <LandingPage onNavigate={navigateTo} onLogout={handleLogout} isAdmin={isAdmin} />;
+      return <LandingPage onNavigate={navigateTo} onLogout={handleLogout} isAdmin={isAdmin} isAuthenticated={true} />;
   }
 };
 

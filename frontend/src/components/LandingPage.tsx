@@ -20,11 +20,12 @@ import {
 
 interface LandingPageProps {
   onNavigate: (page: string, item?: any) => void;
-  onLogout: () => void;
-  isAdmin: boolean;
+  onLogout?: () => void;
+  isAdmin?: boolean;
+  isAuthenticated: boolean;
 }
 
-const LandingPage = ({ onNavigate, onLogout, isAdmin }: LandingPageProps) => {
+const LandingPage = ({ onNavigate, onLogout, isAdmin, isAuthenticated }: LandingPageProps) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const featuredItems = [
@@ -102,13 +103,15 @@ const LandingPage = ({ onNavigate, onLogout, isAdmin }: LandingPageProps) => {
               >
                 Browse
               </button>
-              <button 
-                onClick={() => onNavigate("dashboard")}
-                className="text-gray-700 hover:text-purple-600 font-medium"
-              >
-                My Items
-              </button>
-              {isAdmin && (
+              {isAuthenticated && (
+                <button 
+                  onClick={() => onNavigate("dashboard")}
+                  className="text-gray-700 hover:text-purple-600 font-medium"
+                >
+                  My Items
+                </button>
+              )}
+              {isAuthenticated && isAdmin && (
                 <button 
                   onClick={() => onNavigate("admin")}
                   className="text-purple-600 hover:text-purple-700 font-medium"
@@ -119,21 +122,41 @@ const LandingPage = ({ onNavigate, onLogout, isAdmin }: LandingPageProps) => {
             </nav>
 
             <div className="flex items-center gap-4">
-              <Button
-                onClick={() => onNavigate("add-item")}
-                className="bg-purple-600 hover:bg-purple-700 text-white hidden sm:flex"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Item
-              </Button>
-              <Button
-                onClick={onLogout}
-                variant="ghost"
-                size="sm"
-                className="text-gray-600 hover:text-red-600"
-              >
-                <LogOut className="w-4 h-4" />
-              </Button>
+              {isAuthenticated ? (
+                <>
+                  <Button
+                    onClick={() => onNavigate("add-item")}
+                    className="bg-purple-600 hover:bg-purple-700 text-white hidden sm:flex"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Item
+                  </Button>
+                  <Button
+                    onClick={onLogout}
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-600 hover:text-red-600"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    onClick={() => onNavigate("login")}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    onClick={() => onNavigate("register")}
+                    variant="outline"
+                    className="border-purple-600 text-purple-600 hover:bg-purple-50"
+                  >
+                    Register
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -311,13 +334,15 @@ const LandingPage = ({ onNavigate, onLogout, isAdmin }: LandingPageProps) => {
               List your first item and start discovering amazing pieces from others!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                onClick={() => onNavigate("add-item")}
-                className="bg-white text-purple-600 hover:bg-gray-50"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                List Your First Item
-              </Button>
+              {isAuthenticated && (
+                <Button 
+                  onClick={() => onNavigate("add-item")}
+                  className="bg-white text-purple-600 hover:bg-gray-50"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  List Your First Item
+                </Button>
+              )}
               <Button 
                 variant="outline"
                 onClick={() => onNavigate("browse")}
