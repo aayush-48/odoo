@@ -20,7 +20,8 @@ const AddItemPage = ({ onNavigate, onLogout }: AddItemPageProps) => {
     category: "",
     type: "",
     size: "",
-    condition: ""
+    condition: "",
+    points: ""
   });
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
@@ -167,6 +168,25 @@ const AddItemPage = ({ onNavigate, onLogout }: AddItemPageProps) => {
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="type">Type</Label>
+                    <select
+                      id="type"
+                      value={formData.type}
+                      onChange={(e) => handleInputChange("type", e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-purple-500"
+                      required
+                    >
+                      <option value="">Select type</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="kids">Kids</option>
+                      <option value="unisex">Unisex</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
                     <Label htmlFor="size">Size</Label>
                     <select
                       id="size"
@@ -183,6 +203,20 @@ const AddItemPage = ({ onNavigate, onLogout }: AddItemPageProps) => {
                       <option value="XL">XL</option>
                       <option value="XXL">XXL</option>
                     </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="points">Points</Label>
+                    <Input
+                      id="points"
+                      type="number"
+                      placeholder="e.g., 50"
+                      value={formData.points}
+                      onChange={(e) => handleInputChange("points", e.target.value)}
+                      className="rounded-lg"
+                      required
+                      min="1"
+                    />
                   </div>
                 </div>
 
