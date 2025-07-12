@@ -2,6 +2,10 @@ import Item from "../models/item.model.js";
 import cloudinary from "../lib/cloudinary.js"
 
 export const createItemForSale = async(req, res) => {
+    console.log(req.body);
+    console.log('Incoming:', req.method, req.url);
+    console.log('Headers:', req.headers['content-type']);
+    
     const {userId, title, description, category, type, size, condition, tags, front_image, back_image} = req.body;
     try{
         if(!userId || !title || !description || !category || !type || !size || !condition || !front_image || !back_image){
@@ -12,7 +16,7 @@ export const createItemForSale = async(req, res) => {
         const front_image_res = await cloudinary.uploader.upload(front_image)
         const back_image_res = await cloudinary.uploader.upload(back_image)
         const images = [front_image_res.secure_url , back_image_res.secure_url]
-        console.log(`Reached here 1 ${ await images}`);
+        // console.log(`Reached here 1 ${  images}`);
         
         const item = await Item.create({
             userId,
