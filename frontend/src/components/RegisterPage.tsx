@@ -54,13 +54,13 @@ const RegisterPage = ({ onNavigate }: RegisterPageProps) => {
           <CardContent className="space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">Full Name</Label>
+                <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">user name</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     id="fullName"
                     type="text"
-                    placeholder="Enter your full name"
+                    placeholder="Enter your user name"
                     value={formData.fullName}
                     onChange={(e) => handleInputChange("fullName", e.target.value)}
                     className="pl-10 h-11 rounded-lg border-gray-300 focus:border-purple-500 focus:ring-purple-500"

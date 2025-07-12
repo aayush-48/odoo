@@ -17,6 +17,7 @@ const ItemDetailPage = ({ item, onNavigate, onLogout }: ItemDetailPageProps) => 
     title: "Vintage Denim Jacket",
     description: "Beautiful vintage denim jacket in excellent condition. Perfect for casual outings and layering. Has been well-maintained and shows minimal signs of wear.",
     category: "Outerwear",
+    type: "Unisex",
     size: "M",
     condition: "Excellent",
     tags: ["vintage", "denim", "casual", "layering"],
@@ -28,14 +29,14 @@ const ItemDetailPage = ({ item, onNavigate, onLogout }: ItemDetailPageProps) => 
       name: "Sarah Johnson",
       profileImage: "https://images.unsplash.com/photo-1494790108755-2616b612e5ab?w=100&h=100&fit=crop",
       location: "Downtown District",
-      joinedDate: "January 2024",
-      rating: 4.8
+      joinedDate: "January 2024"
     },
     status: "available",
     pointsValue: 45
   };
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showSwapOptions, setShowSwapOptions] = useState(false);
 
   // Previous listings with proper image URLs
   const previousListings = [
@@ -71,6 +72,12 @@ const ItemDetailPage = ({ item, onNavigate, onLogout }: ItemDetailPageProps) => 
   
   // Ensure tags array exists
   const tags = mockItem.tags || [];
+
+  const handleSwapRequest = (swapType: 'item' | 'points') => {
+    console.log(`${swapType} swap request initiated for item:`, mockItem.id);
+    setShowSwapOptions(false);
+    // Here you would typically navigate to a swap confirmation page or show a modal
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -160,6 +167,9 @@ const ItemDetailPage = ({ item, onNavigate, onLogout }: ItemDetailPageProps) => 
                     <Badge variant="outline">
                       {mockItem.category}
                     </Badge>
+                    <Badge variant="outline">
+                      {mockItem.type}
+                    </Badge>
                   </div>
                 </div>
                 <div className="text-right">
@@ -172,10 +182,14 @@ const ItemDetailPage = ({ item, onNavigate, onLogout }: ItemDetailPageProps) => 
 
               <p className="text-gray-700 leading-relaxed mb-6">{mockItem.description}</p>
 
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-3 gap-4 mb-6">
                 <div>
                   <h3 className="font-medium text-gray-900 mb-1">Size</h3>
                   <p className="text-gray-600">{mockItem.size}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900 mb-1">Type</h3>
+                  <p className="text-gray-600">{mockItem.type}</p>
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900 mb-1">Condition</h3>
@@ -220,32 +234,48 @@ const ItemDetailPage = ({ item, onNavigate, onLogout }: ItemDetailPageProps) => 
                       </span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium text-gray-900">⭐ {mockItem.owner.rating}</div>
-                    <div className="text-xs text-gray-500">Rating</div>
-                  </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Action Buttons */}
             <div className="space-y-3">
-              <Button
-                className="w-full h-12 bg-purple-600 hover:bg-purple-700 text-white font-medium flex items-center justify-center gap-2"
-                onClick={() => console.log("Swap request initiated")}
-              >
-                <Repeat2 className="w-5 h-5" />
-                Request Swap
-              </Button>
-              
-              <Button
-                variant="outline"
-                className="w-full h-12 border-purple-200 text-purple-600 hover:bg-purple-50 font-medium flex items-center justify-center gap-2"
-                onClick={() => console.log("Redeem with points")}
-              >
-                <Coins className="w-5 h-5" />
-                Redeem with {mockItem.pointsValue} Points
-              </Button>
+              {!showSwapOptions ? (
+                <Button
+                  className="w-full h-12 bg-purple-600 hover:bg-purple-700 text-white font-medium flex items-center justify-center gap-2"
+                  onClick={() => setShowSwapOptions(true)}
+                >
+                  <Repeat2 className="w-5 h-5" />
+                  Request Swap
+                </Button>
+              ) : (
+                <div className="space-y-2">
+                  <Button
+                    className="w-full h-12 bg-purple-600 hover:bg-purple-700 text-white font-medium flex items-center justify-center gap-2"
+                    onClick={() => handleSwapRequest('item')}
+                  >
+                    <Repeat2 className="w-5 h-5" />
+                    Swap with My Item
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="w-full h-12 border-purple-200 text-purple-600 hover:bg-purple-50 font-medium flex items-center justify-center gap-2"
+                    onClick={() => handleSwapRequest('points')}
+                  >
+                    <Coins className="w-5 h-5" />
+                    Swap with My Points ({mockItem.pointsValue} Points)
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    className="w-full text-gray-600 hover:text-gray-800"
+                    onClick={() => setShowSwapOptions(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
 
               <Button
                 variant="ghost"
