@@ -6,6 +6,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { Badge } from "../components/ui/badge";
+import axios from "axios"
 import { ArrowLeft, Upload, X, Plus, LogOut } from "lucide-react";
 
 interface AddItemPageProps {
@@ -25,7 +26,23 @@ const AddItemPage = ({ onNavigate, onLogout }: AddItemPageProps) => {
   });
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<any[]>([]);
+
+  const handleImageUpload = async (e : any) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.readAsDataURL(file);
+
+    reader.onload = async () => {
+      const base64Image = reader.result;
+      // setSelectedImg(base64Image);
+      setImages([...images, base64Image])
+      // await updateProfile({ profilePic: base64Image });
+    };
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -42,10 +59,22 @@ const AddItemPage = ({ onNavigate, onLogout }: AddItemPageProps) => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     console.log("Item submitted:", { ...formData, tags, images });
-    onNavigate("dashboard");
+    // onNavigate("dashboard");
+    try{
+      const res = await axios.post("http://localhost:8000/api/item/create", {
+        ...formData, front_image : images[0], back_image: images[1], userId : "asd"
+      })
+
+      console.log(res);
+      
+    }catch(e){
+      console.log(e);
+      
+    }
+
   };
 
   return (
@@ -94,7 +123,7 @@ const AddItemPage = ({ onNavigate, onLogout }: AddItemPageProps) => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  {images.map((image, index) => (
+                  {/* {images.map((image, index) => (
                     <div key={index} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
                       <img src={image} alt={`Item ${index + 1}`} className="w-full h-full object-cover" />
                       <button
@@ -112,7 +141,27 @@ const AddItemPage = ({ onNavigate, onLogout }: AddItemPageProps) => {
                     className="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center hover:border-purple-400 hover:bg-purple-50 transition-colors"
                   >
                     <Plus className="w-8 h-8 text-gray-400" />
-                  </button>
+                  </button> */}
+                  <label htmlFor="front_image">Add front image:</label>
+                  <input
+                  name="front_image"
+                  type="file"
+                  id="avatar-upload"
+                  // className="hidden"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  // disabled={isUpdatingProfile}
+                />
+                <label htmlFor="back_image">Add back image:</label>
+                  <input
+                  name="back_image"
+                  type="file"
+                  id="avatar-upload"
+                  // className="hidden"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  // disabled={isUpdatingProfile}
+                />
                 </div>
               </CardContent>
             </Card>
@@ -229,11 +278,27 @@ const AddItemPage = ({ onNavigate, onLogout }: AddItemPageProps) => {
                     className="w-full p-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-purple-500"
                     required
                   >
-                    <option value="">Select condition</option>
-                    <option value="new">New with tags</option>
-                    <option value="excellent">Excellent</option>
-                    <option value="good">Good</option>
-                    <option value="fair">Fair</option>
+                    <option value="New">New</option>
+                    <option value="Gently Used">Gently Used</option>
+                    <option value="Used">Used</option>
+                    {/* <option value="good">Good</option> */}
+                    {/* <option value="fair">Fair</option> */}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="type">Type</Label>
+                  <select
+                    id="type"
+                    value={formData.type}
+                    onChange={(e) => handleInputChange("type", e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-purple-500"
+                    required
+                  >
+                    <option value="Men">Men</option>
+                    <option value="Women">Women</option>
+                    <option value="Kids">Kids</option>
+                    {/* <option value="good">Good</option> */}
+                    {/* <option value="fair">Fair</option> */}
                   </select>
                 </div>
               </CardContent>
