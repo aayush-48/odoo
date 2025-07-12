@@ -3,8 +3,9 @@ const { Schema, Types } = mongoose;
 
 const itemSchema = new Schema({
   userId: {
-    type: Types.ObjectId,
-    ref: 'User',
+    // type: Types.ObjectId,
+    type : String,
+    // ref: 'User',
     required: true
   },
   title: {
