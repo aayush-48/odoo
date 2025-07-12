@@ -11,12 +11,6 @@ const userSchema = new mongoose.Schema({
     trim: true,
     index: true
   },
-  fullName: {
-    type: String,
-    required: true,
-    lowercase: true,
-    trim: true
-  },
   email: {
     type: String,
     required: true,
@@ -34,7 +28,7 @@ const userSchema = new mongoose.Schema({
   },
   points: {
     type: Number,
-    default: 0
+    default: 100
   },
   role: {
     type: String,

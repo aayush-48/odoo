@@ -3,9 +3,8 @@ const { Schema, Types } = mongoose;
 
 const itemSchema = new Schema({
   userId: {
-    // type: Types.ObjectId,
-    type : String,
-    // ref: 'User',
+    type: Types.ObjectId,
+    ref: 'User',
     required: true
   },
   title: {
@@ -21,7 +20,8 @@ const itemSchema = new Schema({
   category: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    enum: ['Tops', 'Bottoms', 'Dresses', 'Outerwear', 'Footwear', 'Accessories', 'Others']
   },
   type: {
     type: String,
@@ -37,7 +37,7 @@ const itemSchema = new Schema({
   condition: {
     type: String,
     required: true,
-    enum: ['New', 'Gently Used', 'Used'],
+    enum: ['New', 'Excellent', 'Good', 'Fair'],
     trim: true
   },
   tags: {
@@ -56,12 +56,20 @@ const itemSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['available', 'swapped', 'redeemed'],
-    default: 'available'
+    enum: ['active', 'swapped', 'pending'],
+    default: 'active'
   },
-  approved: {
-    type: Boolean,
-    default: false
+  points: {
+    type: Number,
+    required: true,
+    min: 0,
+    default: 0,
+    validate: {
+      validator: function (val) {
+        return Number.isInteger(val);
+      },
+      message: "Points must be a non-negative integer"
+    }
   }
 }, { timestamps: true });
 

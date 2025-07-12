@@ -4,10 +4,10 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 // Register User Controller
 const registerUser = async (req, res) => {
   try {
-    const { fullName, username, email, password } = req.body;
+    const { username, email, password } = req.body;
 
     // Validate required fields
-    if ([fullName, username, email, password].some(field => !field?.trim())) {
+    if ([username, email, password].some(field => !field?.trim())) {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
@@ -30,7 +30,6 @@ const registerUser = async (req, res) => {
 
     // Create user
     const newUser = await User.create({
-      fullName,
       username: username.toLowerCase(),
       email,
       password,
@@ -40,7 +39,6 @@ const registerUser = async (req, res) => {
     // Exclude sensitive info
     const userResponse = {
       _id: newUser._id,
-      fullName: newUser.fullName,
       username: newUser.username,
       email: newUser.email,
       profileImage: newUser.profileImage,
@@ -60,5 +58,48 @@ const registerUser = async (req, res) => {
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-export { registerUser };
+    if (!email?.trim() || !password?.trim()) {
+      return res.status(400).json({ success: false, message: "Email and password are required" });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user || !(await user.isPasswordCorrect(password))) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+    
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      data: {
+        _id: user._id,
+        username: user.username,
+        fullName: user.fullName,
+        email: user.email,
+        profileImage: user.profileImage,
+        accessToken
+      }
+    });
+  } catch (error) {
+    console.error("Login Error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export { loginUser,registerUser };
