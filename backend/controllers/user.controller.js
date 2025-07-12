@@ -4,10 +4,10 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 // Register User Controller
 const registerUser = async (req, res) => {
   try {
-    const { fullName, username, email, password } = req.body;
+    const { username, email, password } = req.body;
 
     // Validate required fields
-    if ([fullName, username, email, password].some(field => !field?.trim())) {
+    if ([username, email, password].some(field => !field?.trim())) {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
 
@@ -30,7 +30,6 @@ const registerUser = async (req, res) => {
 
     // Create user
     const newUser = await User.create({
-      fullName,
       username: username.toLowerCase(),
       email,
       password,
@@ -40,7 +39,6 @@ const registerUser = async (req, res) => {
     // Exclude sensitive info
     const userResponse = {
       _id: newUser._id,
-      fullName: newUser.fullName,
       username: newUser.username,
       email: newUser.email,
       profileImage: newUser.profileImage,
@@ -62,13 +60,13 @@ const registerUser = async (req, res) => {
 };
 const loginUser = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!username?.trim() || !password?.trim()) {
-      return res.status(400).json({ success: false, message: "Username and password are required" });
+    if (!email?.trim() || !password?.trim()) {
+      return res.status(400).json({ success: false, message: "Email and password are required" });
     }
 
-    const user = await User.findOne({ username: username.toLowerCase() });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user || !(await user.isPasswordCorrect(password))) {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
@@ -78,8 +76,7 @@ const loginUser = async (req, res) => {
 
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
-
-    // Set cookie with refresh token
+    
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

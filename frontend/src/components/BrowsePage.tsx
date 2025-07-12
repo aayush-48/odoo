@@ -18,16 +18,17 @@ const BrowsePage = ({ onNavigate, onLogout }: BrowsePageProps) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const mockItems = [
-    { id: 1, title: "Vintage Denim Jacket", category: "Outerwear", size: "M", condition: "Excellent", image: "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=300&h=300&fit=crop", owner: "Sarah" },
-    { id: 2, title: "Summer Floral Dress", category: "Dresses", size: "S", condition: "Good", image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300&h=300&fit=crop", owner: "Emma" },
-    { id: 3, title: "Classic White Sneakers", category: "Footwear", size: "9", condition: "New", image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=300&fit=crop", owner: "Mike" },
-    { id: 4, title: "Wool Winter Coat", category: "Outerwear", size: "L", condition: "Excellent", image: "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=300&h=300&fit=crop", owner: "David" },
-    { id: 5, title: "Casual T-Shirt", category: "Tops", size: "M", condition: "Good", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop", owner: "Lisa" },
-    { id: 6, title: "Designer Jeans", category: "Bottoms", size: "32", condition: "Excellent", image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=300&h=300&fit=crop", owner: "Tom" }
+    { id: 1, title: "Vintage Denim Jacket", category: "Outerwear", type: "Unisex", size: "M", condition: "Excellent", image: "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=300&h=300&fit=crop", owner: "Sarah" },
+    { id: 2, title: "Summer Floral Dress", category: "Dresses", type: "Female", size: "S", condition: "Good", image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300&h=300&fit=crop", owner: "Emma" },
+    { id: 3, title: "Classic White Sneakers", category: "Footwear", type: "Unisex", size: "9", condition: "New", image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=300&fit=crop", owner: "Mike" },
+    { id: 4, title: "Wool Winter Coat", category: "Outerwear", type: "Male", size: "L", condition: "Excellent", image: "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=300&h=300&fit=crop", owner: "David" },
+    { id: 5, title: "Casual T-Shirt", category: "Tops", type: "Kids", size: "M", condition: "Good", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop", owner: "Lisa" },
+    { id: 6, title: "Designer Jeans", category: "Bottoms", type: "Female", size: "32", condition: "Excellent", image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=300&h=300&fit=crop", owner: "Tom" }
   ];
 
   const filters = {
     categories: ["Tops", "Bottoms", "Dresses", "Outerwear", "Footwear", "Accessories"],
+    types: ["Male", "Female", "Kids", "Unisex"],
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     conditions: ["New", "Excellent", "Good", "Fair"]
   };
@@ -54,6 +55,7 @@ const BrowsePage = ({ onNavigate, onLogout }: BrowsePageProps) => {
     const matchesFilters = selectedFilters.length === 0 || 
       selectedFilters.some(filter => 
         item.category === filter || 
+        item.type === filter ||
         item.size === filter || 
         item.condition === filter
       );
@@ -134,6 +136,23 @@ const BrowsePage = ({ onNavigate, onLogout }: BrowsePageProps) => {
                             className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                           />
                           <span className="ml-2 text-sm text-gray-700">{category}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Type</h4>
+                    <div className="space-y-2">
+                      {filters.types.map((type) => (
+                        <label key={type} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedFilters.includes(type)}
+                            onChange={() => toggleFilter(type)}
+                            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                          />
+                          <span className="ml-2 text-sm text-gray-700">{type}</span>
                         </label>
                       ))}
                     </div>
@@ -259,6 +278,7 @@ const BrowsePage = ({ onNavigate, onLogout }: BrowsePageProps) => {
                         <p className="text-sm text-gray-500 mb-2">by {item.owner}</p>
                         <div className="flex flex-wrap gap-1 mb-2">
                           <Badge variant="outline" className="text-xs">{item.category}</Badge>
+                          <Badge variant="outline" className="text-xs">{item.type}</Badge>
                           <Badge variant="outline" className="text-xs">{item.size}</Badge>
                           <Badge variant="outline" className="text-xs">{item.condition}</Badge>
                         </div>

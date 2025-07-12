@@ -4,7 +4,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Textarea } from "../components/ui/textarea";
 import { Badge } from "../components/ui/badge";
-import { ArrowLeft, User, Plus, Minus, Star, Heart, Share2, LogOut } from "lucide-react";
+import { ArrowLeft, Plus, Minus, Heart, Share2, LogOut } from "lucide-react";
 
 interface ProductDetailPageProps {
   item: any;
@@ -14,12 +14,12 @@ interface ProductDetailPageProps {
 
 const ProductDetailPage = ({ item, onNavigate, onLogout }: ProductDetailPageProps) => {
   const [description, setDescription] = useState("");
-  const [rating, setRating] = useState(0);
 
   const mockItem = {
     id: 1,
     title: "Vintage Denim Jacket",
     category: "Outerwear",
+    type: "Unisex",
     size: "M",
     condition: "Excellent",
     brand: "Levi's",
@@ -32,8 +32,7 @@ const ProductDetailPage = ({ item, onNavigate, onLogout }: ProductDetailPageProp
     ],
     owner: {
       name: "Sarah Johnson",
-      profileImage: "https://images.unsplash.com/photo-1494790108755-2616b612e5ab?w=100&h=100&fit=crop",
-      rating: 4.8
+      profileImage: "https://images.unsplash.com/photo-1494790108755-2616b612e5ab?w=100&h=100&fit=crop"
     }
   };
 
@@ -139,6 +138,16 @@ const ProductDetailPage = ({ item, onNavigate, onLogout }: ProductDetailPageProp
                     </div>
                   </div>
 
+                  {/* Type */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Type
+                    </label>
+                    <div className="p-3 border border-gray-300 rounded bg-gray-50">
+                      {currentItem.type}
+                    </div>
+                  </div>
+
                   {/* Size */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -240,27 +249,6 @@ const ProductDetailPage = ({ item, onNavigate, onLogout }: ProductDetailPageProp
                       >
                         <Plus className="w-4 h-4" />
                       </Button>
-                    </div>
-                  </div>
-
-                  {/* Rating */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Rating
-                    </label>
-                    <div className="flex items-center gap-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          onClick={() => setRating(star)}
-                          className={`p-1 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                        >
-                          <Star className="w-5 h-5 fill-current" />
-                        </button>
-                      ))}
-                      <span className="ml-2 text-sm text-gray-600">
-                        {rating > 0 ? `${rating}/5` : 'No rating'}
-                      </span>
                     </div>
                   </div>
                 </div>
