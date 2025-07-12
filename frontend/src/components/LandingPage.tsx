@@ -20,12 +20,22 @@ import {
 
 interface LandingPageProps {
   onNavigate: (page: string, item?: any) => void;
-  onLogout: () => void;
-  isAdmin: boolean;
+  onLogout?: () => void;
+  isAdmin?: boolean;
+  isAuthenticated?: boolean;
 }
 
-const LandingPage = ({ onNavigate, onLogout, isAdmin }: LandingPageProps) => {
+const LandingPage = ({ onNavigate, onLogout, isAdmin = false, isAuthenticated = false }: LandingPageProps) => {
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Handle navigation - redirect to login if not authenticated for protected routes
+  const handleNavigation = (page: string, item?: any) => {
+    if (!isAuthenticated && ['browse', 'dashboard', 'add-item', 'admin'].includes(page)) {
+      onNavigate("login");
+    } else {
+      onNavigate(page, item);
+    }
+  };
 
   const featuredItems = [
     {
@@ -95,46 +105,71 @@ const LandingPage = ({ onNavigate, onLogout, isAdmin }: LandingPageProps) => {
               <h1 className="text-xl font-bold text-gray-900">ReWear</h1>
             </div>
             
-            <nav className="hidden md:flex items-center gap-6">
+            {/* Navigation */}
+            <nav className="flex items-center gap-6">
               <button 
-                onClick={() => onNavigate("browse")}
+                onClick={() => onNavigate("home")}
                 className="text-gray-700 hover:text-purple-600 font-medium"
               >
-                Browse
+                Home
               </button>
-              <button 
-                onClick={() => onNavigate("dashboard")}
-                className="text-gray-700 hover:text-purple-600 font-medium"
-              >
-                My Items
-              </button>
-              {isAdmin && (
-                <button 
-                  onClick={() => onNavigate("admin")}
-                  className="text-purple-600 hover:text-purple-700 font-medium"
-                >
-                  Admin Panel
-                </button>
+              
+              {!isAuthenticated ? (
+                <>
+                  <button 
+                    onClick={() => onNavigate("login")}
+                    className="text-gray-700 hover:text-purple-600 font-medium"
+                  >
+                    Login
+                  </button>
+                  <button 
+                    onClick={() => onNavigate("register")}
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    Sign Up
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Show authenticated user navigation */}
+                  <button 
+                    onClick={() => handleNavigation("browse")}
+                    className="text-gray-700 hover:text-purple-600 font-medium hidden md:block"
+                  >
+                    Browse
+                  </button>
+                  <button 
+                    onClick={() => handleNavigation("dashboard")}
+                    className="text-gray-700 hover:text-purple-600 font-medium hidden md:block"
+                  >
+                    My Items
+                  </button>
+                  {isAdmin && (
+                    <button 
+                      onClick={() => handleNavigation("admin")}
+                      className="text-purple-600 hover:text-purple-700 font-medium hidden md:block"
+                    >
+                      Admin Panel
+                    </button>
+                  )}
+                  <Button
+                    onClick={() => handleNavigation("add-item")}
+                    className="bg-purple-600 hover:bg-purple-700 text-white hidden sm:flex"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Item
+                  </Button>
+                  <Button
+                    onClick={onLogout}
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-600 hover:text-red-600"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </>
               )}
             </nav>
-
-            <div className="flex items-center gap-4">
-              <Button
-                onClick={() => onNavigate("add-item")}
-                className="bg-purple-600 hover:bg-purple-700 text-white hidden sm:flex"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Item
-              </Button>
-              <Button
-                onClick={onLogout}
-                variant="ghost"
-                size="sm"
-                className="text-gray-600 hover:text-red-600"
-              >
-                <LogOut className="w-4 h-4" />
-              </Button>
-            </div>
           </div>
         </div>
       </header>
@@ -162,7 +197,7 @@ const LandingPage = ({ onNavigate, onLogout, isAdmin }: LandingPageProps) => {
             />
             <Button 
               className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-purple-600 hover:bg-purple-700"
-              onClick={() => onNavigate("browse")}
+              onClick={() => handleNavigation("browse")}
             >
               Search
             </Button>
@@ -175,7 +210,7 @@ const LandingPage = ({ onNavigate, onLogout, isAdmin }: LandingPageProps) => {
                 key={category}
                 variant="outline" 
                 className="cursor-pointer hover:bg-purple-50 hover:border-purple-300"
-                onClick={() => onNavigate("browse")}
+                onClick={() => handleNavigation("browse")}
               >
                 {category}
               </Badge>
@@ -228,7 +263,7 @@ const LandingPage = ({ onNavigate, onLogout, isAdmin }: LandingPageProps) => {
             <h3 className="text-2xl font-bold text-gray-900">Featured Items</h3>
             <Button 
               variant="outline"
-              onClick={() => onNavigate("browse")}
+              onClick={() => handleNavigation("browse")}
               className="border-purple-200 text-purple-600 hover:bg-purple-50"
             >
               View All
@@ -240,7 +275,7 @@ const LandingPage = ({ onNavigate, onLogout, isAdmin }: LandingPageProps) => {
               <Card 
                 key={item.id} 
                 className="group hover:shadow-xl transition-shadow cursor-pointer"
-                onClick={() => onNavigate("item-detail", item)}
+                onClick={() => handleNavigation("item-detail", item)}
               >
                 <CardContent className="p-0">
                   <div className="aspect-square bg-gray-200 rounded-t-lg overflow-hidden relative">
@@ -254,6 +289,12 @@ const LandingPage = ({ onNavigate, onLogout, isAdmin }: LandingPageProps) => {
                         size="sm"
                         variant="ghost"
                         className="w-8 h-8 rounded-full bg-white/80 hover:bg-white p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isAuthenticated) {
+                            onNavigate("login");
+                          }
+                        }}
                       >
                         <Heart className="w-4 h-4" />
                       </Button>
@@ -312,7 +353,7 @@ const LandingPage = ({ onNavigate, onLogout, isAdmin }: LandingPageProps) => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                onClick={() => onNavigate("add-item")}
+                onClick={() => handleNavigation("add-item")}
                 className="bg-white text-purple-600 hover:bg-gray-50"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -320,7 +361,7 @@ const LandingPage = ({ onNavigate, onLogout, isAdmin }: LandingPageProps) => {
               </Button>
               <Button 
                 variant="outline"
-                onClick={() => onNavigate("browse")}
+                onClick={() => handleNavigation("browse")}
                 className="border-white text-white hover:bg-white/10"
               >
                 Start Browsing
