@@ -33,8 +33,39 @@ interface AdminPanelProps {
 const AdminPanel = ({ onNavigate, onLogout }: AdminPanelProps) => {
   const [selectedTab, setSelectedTab] = useState("pending");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [selectedUser, setSelectedUser] = useState(null);
+  type PendingItem = {
+    id: number;
+    title: string;
+    user: string;
+    submitted: string;
+    status: string;
+    flagged: boolean;
+    description: string;
+    category: string;
+    condition: string;
+    images: string[];
+    location: string;
+  };
+  
+  const [selectedItem, setSelectedItem] = useState<PendingItem | null>(null);
+
+  type User = {
+    id: number;
+    name: string;
+    email: string;
+    items: number;
+    swaps: number;
+    joined: string;
+    status: string;
+    phone: string;
+    address: string;
+    rating: number;
+    completedSwaps: number;
+    cancelledSwaps: number;
+    recentActivity: string;
+  };
+
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showItemModal, setShowItemModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
 
